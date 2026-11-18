@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arbitraje USDT · Binance · Bybit · OKX · Bitget</title>
+<style>
+:root{
+  --bg:#0b0e11; --panel:#181a20; --panel2:#1e2329; --hover:#2b3139; --line:#2b3139;
+  --txt:#eaecef; --mut:#848e9c; --mut2:#5e6673;
+  --yel:#fcd535; --yel-d:#f0b90b; --grn:#0ecb81; --red:#f6465d; --blue:#1e88e5;
+  --sh:0 6px 24px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);
+  font-family:Inter,"Binance Plex","Inter var",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:var(--yel);text-decoration:none}
+a:hover{text-decoration:underline}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.mut{color:var(--mut)} .mut2{color:var(--mut2)}
+.g{color:var(--grn)} .r{color:var(--red)} .y{color:var(--yel)}
+.right{text-align:right} .center{text-align:center}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+
+/* ---------- top bar ---------- */
+header.top{position:sticky;top:0;z-index:40;background:rgba(11,14,17,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:32px;height:32px;display:grid;place-items:center;color:var(--yel);font-size:20px;
+  background:linear-gradient(160deg,#2b3139,#181a20);border:1px solid #353c46;border-radius:9px}
+.brand h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px}
+.brand p{margin:0;font-size:11.5px;color:var(--mut)}
+.grow{flex:1}
+.pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--mut);white-space:nowrap}
+.pill.live{color:var(--grn);border-color:rgba(14,203,129,.35);background:rgba(14,203,129,.08)}
+.pill.snap{color:var(--yel);border-color:rgba(252,213,53,.35);background:rgba(252,213,53,.08)}
+.pill.bad{color:var(--red);border-color:rgba(246,70,93,.35);background:rgba(246,70,93,.08)}
+.btn{background:var(--yel);color:#181a20;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.btn:hover{background:var(--yel-d)}
+.btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--hover);border-color:#3c4450}
+.btn.sm{padding:6px 10px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- tabs ---------- */
+nav.tabs{display:flex;gap:4px;padding:8px 18px 0;border-bottom:1px solid var(--line);
+  position:sticky;top:57px;background:var(--bg);z-index:30;overflow-x:auto}
+.tab{background:none;border:0;color:var(--mut);font:600 13.5px inherit;padding:10px 14px;cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--txt)}
+.tab.active{color:var(--yel);border-bottom-color:var(--yel)}
+main{padding:16px 18px 60px;max-width:1500px;margin:0 auto}
+section[hidden]{display:none}
+
+/* ---------- cards / panel ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.panel h2{font-size:14px;margin:0 0 10px;font-weight:700}
+.panel h2 small{color:var(--mut);font-weight:500;font-size:11.5px;margin-left:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:14px}
+.kpi{background:linear-gradient(180deg,#1b1e24,#16181d);border:1px solid var(--line);border-radius:12px;padding:13px 14px;position:relative;overflow:hidden}
+.kpi .lab{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.kpi .val{font-size:23px;font-weight:700;margin:6px 0 3px;letter-spacing:-.4px}
+.kpi .sub{font-size:11.5px;color:var(--mut)}
+.kpi.good{border-color:rgba(14,203,129,.4)} .kpi.good .val{color:var(--grn)}
+.kpi.warn{border-color:rgba(252,213,53,.4)} .kpi.warn .val{color:var(--yel)}
+.kpi.bad{border-color:rgba(246,70,93,.4)} .kpi.bad .val{color:var(--red)}
+
+/* ---------- tables ---------- */
+.tblwrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{position:sticky;top:0;background:#1b1e24;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.4px;
+  text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:2}
+td{padding:9px 10px;border-bottom:1px solid #22262e;white-space:nowrap}
+tbody tr:hover{background:#1c2026;cursor:pointer}
+tbody tr.sel{background:#232830}
+tbody tr.dead{opacity:.62}
+.venue{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.binance{background:#f0b90b} .bybit{background:#f7a600} .okx{background:#8ea0b5} .bitget{background:#00f0ff}
+.badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;border:1px solid var(--line);color:var(--mut)}
+.badge.go{color:#0b0e11;background:var(--grn);border-color:var(--grn)}
+.badge.thin{color:var(--yel);border-color:rgba(252,213,53,.5);background:rgba(252,213,53,.1)}
+.badge.no{color:var(--mut);background:#22262e}
+.badge.src{font-weight:600;color:var(--mut)}
+.badge.live{color:var(--grn);border-color:rgba(14,203,129,.4)}
+.badge.declarado{color:#6cc0ff;border-color:rgba(30,136,229,.4)}
+.badge.estimado{color:var(--yel);border-color:rgba(252,213,53,.4)}
+.badge.asumido{color:var(--red);border-color:rgba(246,70,93,.4)}
+.arrow{color:var(--mut2);margin:0 2px}
+.chev{color:var(--mut2)}
+
+/* ---------- filters ---------- */
+.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+input[type=text],input[type=number],select{background:#1b1e24;border:1px solid var(--line);color:var(--txt);
+  border-radius:8px;padding:7px 10px;font:inherit;font-size:13px;outline:none;min-width:70px}
+input:focus,select:focus{border-color:var(--yel)}
+label.chk{display:inline-flex;gap:6px;align-items:center;color:var(--mut);font-size:12.5px;cursor:pointer}
+input[type=range]{accent-color:var(--yel)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+
+/* ---------- heatmap ---------- */
+.heat{display:grid;grid-template-columns:110px repeat(4,1fr);gap:6px}
+.heat .hcell{padding:10px 8px;border-radius:9px;text-align:center;font-size:12px;background:#1b1e24;border:1px solid var(--line)}
+.heat .hhead{background:transparent;border:0;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.heat .hlab{display:flex;align-items:center;gap:7px;color:var(--txt);font-weight:600;background:transparent;border:0;padding-left:0}
+
+/* ---------- drawer / modal ---------- */
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(560px,96vw);background:#14171c;border-left:1px solid var(--line);
+  box-shadow:var(--sh);transform:translateX(102%);transition:transform .22s ease;z-index:60;display:flex;flex-direction:column}
+.drawer.open{transform:none}
+.drawer header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.drawer .body{padding:16px;overflow:auto}
+.modal{position:fixed;inset:0;background:rgba(6,8,10,.72);z-index:70;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal.open{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(820px,100%);box-shadow:var(--sh)}
+.modal .box header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.modal .box .body{padding:16px 18px}
+.x{background:none;border:0;color:var(--mut);font-size:20px;cursor:pointer;line-height:1}
+.x:hover{color:var(--txt)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 14px;font-size:13px;margin:2px 0}
+.kv .k{color:var(--mut)}
+.steps{counter-reset:s;padding-left:0;list-style:none;margin:8px 0}
+.steps li{counter-increment:s;position:relative;padding:9px 0 9px 34px;border-bottom:1px solid #22262e;font-size:13px}
+.steps li:before{content:counter(s);position:absolute;left:0;top:9px;width:22px;height:22px;border-radius:50%;
+  background:#232830;color:var(--yel);font-weight:700;font-size:12px;display:grid;place-items:center}
+.note{background:#1b1e24;border-left:3px solid var(--yel);padding:10px 12px;border-radius:8px;font-size:12.5px;color:#cfd4dd;margin:10px 0}
+.note.red{border-left-color:var(--red)} .note.green{border-left-color:var(--grn)}
+canvas{width:100%;height:170px;display:block}
+footer{margin-top:20px;padding:16px 4px;border-top:1px solid var(--line);color:var(--mut2);font-size:11.5px}
+code{background:#232830;padding:1px 5px;border-radius:5px;font-size:12px}
+.hide{display:none!important}
+.banner{padding:9px 12px;border-radius:9px;font-size:12.5px;margin-bottom:12px;border:1px solid var(--line);background:#1b1e24;color:#cfd4dd}
+.banner.warn{border-color:rgba(252,213,53,.45)}
+.chip{font-size:11px;padding:2px 8px;border-radius:20px;background:#232830;color:var(--mut);border:1px solid var(--line)}
+@media(max-width:820px){ .kpi .val{font-size:19px} main{padding:12px} th,td{padding:8px} }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">◆</div>
+    <div>
+      <h1>Arbitraje USDT</h1>
+      <p>Binance · Bybit · OKX · Bitget — precios, comisiones y neto real</p>
+    </div>
+  </div>
+  <span class="grow"></span>
+  <span id="modePill" class="pill">cargando…</span>
+  <span id="tsLabel" class="mut num" style="font-size:12px">—</span>
+  <button id="refreshBtn" class="btn ghost sm">↻ Actualizar</button>
+  <button id="cfgBtn" class="btn ghost sm">⚙ Configuración</button>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="ops">Oportunidades</button>
+  <button class="tab" data-tab="map">Mapa de calor</button>
+  <button class="tab" data-tab="sim">Simulador</button>
+  <button class="tab" data-tab="fees">Comisiones</button>
+  <button class="tab" data-tab="help">Metodología y realismo</button>
+</nav>
+
+<main>
+  <div id="banners"></div>
+
+  <!-- ================= OPORTUNIDADES ================= -->
+  <section id="tab-ops">
+    <div class="kpis" id="kpis"></div>
+
+    <div class="panel">
+      <div class="filters">
+        <input type="text" id="fCoin" placeholder="Buscar moneda (XRP, SOL…)" style="width:190px">
+        <select id="fVenue">
+          <option value="">Comprar en: todas</option>
+        </select>
+        <select id="fSort">
+          <option value="net">Ordenar: neto $ ↓</option>
+          <option value="netbps">Ordenar: neto bps ↓</option>
+          <option value="margin">Ordenar: margen sobre el costo ↓</option>
+          <option value="spread">Ordenar: spread bruto ↓</option>
+          <option value="liq">Ordenar: liquidez ↓</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="fOnly"> Solo con margen positivo</label>
+        <label class="chk"><input type="checkbox" id="fDecl"> Ocultar estimados de red</label>
+        <label class="chk" title="USDT por operación en cada tramo">Tamaño <b id="sizeLab" class="y num">500</b> USDT
+          <input type="range" id="fSize" min="100" max="5000" step="50" value="500" style="width:130px"></label>
+        <label class="chk" title="Incluye en el neto el costo de comprar USDT con CLP y de volver a CLP (P2P/ramp). Se configura en Configuración."><input type="checkbox" id="fClp"> Tramo CLP</label>
+        <label class="chk" title="Amortiza la comisión de red: transfieres la moneda cada N ciclos en vez de en todos (necesitas inventario de esa moneda en la plataforma de venta)">Lotes
+          <select id="fBatch">
+            <option value="1">rebalanceo cada ciclo</option>
+            <option value="2">cada 2 ciclos</option>
+            <option value="4">cada 4 ciclos</option>
+            <option value="8">cada 8 ciclos</option>
+          </select></label>
+      </div>
+      <div class="tblwrap">
+        <table id="opsTable">
+          <thead><tr>
+            <th>Moneda</th><th>Ruta (compra → venta)</th><th class="right">Precio compra</th><th class="right">Precio venta</th>
+            <th class="right">Spread bruto</th><th class="right">Costo del ciclo</th><th class="right">Comisión de red</th>
+            <th class="right">Neto / ciclo</th><th class="right">Neto bps</th><th class="right">Tamaño</th><th>Veredicto</th><th></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="mut" style="font-size:11.5px;margin:9px 2px 0" id="tableFoot"></p>
+    </div>
+
+    <div class="panel">
+      <h2>BTC/USDT por plataforma <small>bid, ask, spread propio y desvío contra el precio medio</small></h2>
+        <div class="tblwrap">
+          <table id="venueTable"><thead><tr><th>Plataforma</th><th class="right">Bid (vendes)</th><th class="right">Ask (compras)</th><th class="right">Spread propio</th><th class="right">Desvío vs promedio</th><th class="right">Volumen 24 h</th><th class="right">Retiro BTC</th></tr></thead><tbody></tbody></table>
+        </div>
+      <p class="mut" style="font-size:11.5px;margin:8px 2px 0" id="venueFoot"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Mejor neto vs umbral <small>se guarda en tu navegador mientras la página está abierta</small></h2>
+      <canvas id="chart"></canvas>
+      <p class="mut" style="font-size:11.5px;margin:6px 0 0" id="chartFoot">Se dibuja el mejor neto (bps) de cada actualización.</p>
+    </div>
+  </section>
+
+  <!-- ================= MAPA ================= -->
+  <section id="tab-map" hidden>
+    <div class="panel">
+      <h2>Mejor neto por ruta <small>máximo sobre todas las monedas y el tamaño elegido</small></h2>
+      <div class="heat" id="heat"></div>
+      <p class="mut" style="font-size:11.5px;margin:10px 0 0">Filas: dónde compras · Columnas: dónde vendes. Verde = hay margen después de comisiones, rojo = pierdes. Haz clic en un cuadro para ver la operación.</p>
+    </div>
+  </section>
+
+  <!-- ================= SIMULADOR ================= -->
+  <section id="tab-sim" hidden>
+    <div class="panel">
+      <h2>Simulador (paper trading) <small>no manda órdenes reales: solo lleva la cuenta con los precios y comisiones de arriba</small></h2>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn" id="simBest">▶ Ejecutar la mejor oportunidad</button>
+        <button class="btn ghost sm" id="simWorst">Ejecutar la peor (para comparar)</button>
+        <button class="btn ghost sm" id="simReset">Borrar historial</button>
+        <span class="mut" id="simMsg" style="font-size:12.5px"></span>
+      </div>
+      <div id="simKpis" class="row" style="gap:20px;margin-bottom:12px"></div>
+      <div class="tblwrap">
+        <table id="ledger"><thead><tr><th>#</th><th>Hora</th><th>Operación</th><th class="right">USDT</th><th class="right">Precio compra</th><th class="right">Precio venta</th><th class="right">Comisiones</th><th class="right">Red + rebal.</th><th class="right">Neto</th><th class="right">bps</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div id="simBal" class="row" style="margin-top:12px;gap:10px"></div>
+    </div>
+  </section>
+
+  <!-- ================= COMISIONES ================= -->
+  <section id="tab-fees" hidden>
+    <div class="panel">
+      <h2>Comisión de trading <small>editable: pon la de tu nivel real</small></h2>
+      <div class="tblwrap"><table id="feeVenues"><thead><tr><th>Plataforma</th><th class="right">Taker</th><th class="right">Taker con descuento</th><th>Ajuste tuyo</th><th class="right">Retiro USDT</th><th>Nota</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="panel">
+      <h2>Comisión de retiro por moneda <small>se cobra en monedas y es fija, sin importar el monto</small></h2>
+      <div class="row" style="margin-bottom:10px">
+        <span class="badge live">live = API del exchange</span>
+        <span class="badge declarado">declarado = publicado por el exchange</span>
+        <span class="badge estimado">estimado = falta el dato, verifica</span>
+        <span class="badge asumido">asumido = sin dato</span>
+        <select id="feeCoinSel"></select>
+      </div>
+      <div class="tblwrap"><table id="feeCoins"><thead><tr><th>Plataforma</th><th>Red</th><th class="right">Comisión (monedas)</th><th class="right">Comisión en USDT</th><th class="right">% del tramo de 500 USDT</th><th>Origen del dato</th><th>Mi valor</th></tr></thead><tbody></tbody></table></div>
+      <p class="mut" style="font-size:11.5px;margin:9px 2px 0">Enlaces a las páginas oficiales: <span id="feeLinks"></span></p>
+    </div>
+  </section>
+
+  <!-- ================= AYUDA ================= -->
+  <section id="tab-help" hidden>
+    <div class="panel">
+      <h2>Qué calcula la página <small>universo: solo BTC/USDT</small></h2>
+      <p style="font-size:13px">Tu flujo es <b>CLP → USDT → BTC → USDT</b> (y de vuelta a CLP cuando quieras). El tramo que genera la ganancia es el del medio, y es el que calcula cada fila:</p>
+      <ol class="steps">
+        <li><b>Fondeas con CLP</b>: compras USDT por P2P o rampa fiat (spread 0,2–1 %). Esto <b>no</b> se cuenta por defecto, porque el USDT lo dejas trabajando; si quieres verlo en el neto, activa «Tramo CLP» (y define cada cuántos ciclos vuelves a pesos).</li>
+      </ol>
+      <ol class="steps">
+        <li><b>Compras BTC con USDT</b> en la punta de venta (ask) de la plataforma A. Pagas el taker de A y la slippage del tamaño elegido.</li>
+        <li><b>Retiras BTC</b> de A hacia B. La comisión de red se cobra <b>en BTC</b> y es fija (0,00002 BTC ≈ 1,7 USDT): pesa más mientras más chico es el tramo.</li>
+        <li><b>Vendes BTC por USDT</b> en la punta de compra (bid) de B. Pagas el taker de B. Acá es donde queda la ganancia, medida en USDT.</li>
+        <li><b>Rebalanceas USDT</b>: el USDT quedó en B y te falta en A, así que devuelves USDT por red barata (BEP20/BSC ≈ 0,01 USDT).</li>
+        <li><b>Vuelves a CLP</b> cuando quieras (o cada N ciclos): ahí entra el spread del P2P de salida.</li>
+      </ol>
+      <div class="note">Con BTC el costo fijo manda: taker A 10 bps + taker B 10 bps + slippage 2–4 bps + <b>retiro de BTC 0,00002 BTC ≈ 1,7 USDT</b> (que a 500 USDT son 34 bps, a 5.000 son 3,4 bps) + rebalanceo de USDT ~0,2 bps. Por eso <b>a 500 USDT necesitas más de ~50 bps de spread bruto</b> para ganar algo, y con tramos grandes o rebalanceo por lotes el umbral baja a ~25 bps. Truco extra: si las dos plataformas aceptan BTC por <b>Lightning</b>, la comisión baja ~20× (edítala en Comisiones).</div>
+      <p class="mut" style="font-size:12.5px">Fórmula del neto: <code>neto = (monedas − comisión_red) × bid_B × (1 − taker_B) − USDT_gastado −USDT_rebalanceo</code></p>
+    </div>
+    <div class="panel">
+      <h2>Lo que la página <span class="y">no</span> incluye (y por qué importa)</h2>
+      <ul style="font-size:13px;color:#cfd4dd">
+        <li>Subir/depositar fondos (transferencia bancaria, P2P, spread de compra de USDT con CLP).</li>
+        <li>El <b>riesgo de precio</b> durante los minutos de la transferencia (se muestra una estimación de deriva, pero no se resta salvo que actives «penalizar riesgo»).</li>
+        <li>Que la otra plataforma <b>acepte el depósito en esa red</b> y que la red no esté en mantenimiento (verifica al retirar: siempre prueba con monto mínimo la primera vez).</li>
+        <li>Profundidad más allá del primer nivel del libro, límites de retiro, bloqueos de cuenta nueva, verificación de identidad pendiente.</li>
+        <li>Impuestos en Chile (el SII grava las ganancias por enajenación de criptoactivos) y comisión de retiro a banco.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2>Cómo partir desde Chile</h2>
+      <ol class="steps">
+        <li><b>Cuenta y KYC</b> en Binance, Bybit, OKX y Bitget (todas operan con usuarios chilenos; aceptan pasaporte/cédula). Activa 2FA y whitelist de direcciones.</li>
+        <li><b>Fondea</b> cada cuenta con USDT (o USDC/CLP) manteniendo el inventario repartido: 500 en cada una es suficiente para tramos de 400–500.</li>
+        <li><b>Habilita redes baratas</b> por moneda (BEP20/BSC, TRC20, XRP, SOL, AVAX-C, Plasma) y verifica <b>en las dos puntas</b> que la red esté aceptada para depósito.</li>
+        <li><b>Prueba con 20–50 USDT</b> el ciclo completo (compra BTC → retiro → venta → rebalanceo) y anota los costos reales que viste; luego corrígelos en la pestaña Comisiones.</li>
+        <li><b>Define la red de BTC</b>: nativa (segura, ~10–40 min y 0,00002 BTC), Lightning (baratísima, segundos, pero no todas las plataformas la aceptan para depósito) o BEP20 (solo si la otra punta la acepta). La página usa la nativa por defecto: si usas otra, corrígela en Comisiones.</li>
+        <li><b>Recién después</b> escala el tamaño: la comisión de red es fija, así que el margen por unidad mejora con tramos más grandes, siempre que el libro aguante (mira el tamaño del top of book).</li>
+      </ol>
+      <div class="note red">Realismo incómodo: con taker 0,10 % por punta y comisiones de retiro fijas, el arbitraje simple entre estas 4 plataformas está cerrado casi todo el día. Las ventanas aparecen en monedas ilíquidas o cuando una plataforma se queda atrás en un movimiento fuerte; ahí el riesgo de deriva y la liquidez del libro son el verdadero límite, no la comisión.</div>
+    </div>
+    <div class="panel">
+      <h2>Fuentes de precios y comisiones</h2>
+      <div class="tblwrap"><table id="srcTable"><thead><tr><th>Fuente</th><th>Uso en la página</th></tr></thead><tbody></tbody></table></div>
+      <p class="mut" style="font-size:11.5px;margin:8px 2px 0">Precios: API pública de cada plataforma (top of book, sin autenticación) cada <span id="ttlLab">5</span> s. Comisiones de retiro: APIs públicas de Binance y Bitget; el resto declarado/estimado y editable.</p>
+    </div>
+  </section>
+
+  <footer>
+    Herramienta de cálculo y simulación. No manda órdenes ni se conecta a tus cuentas. Verifica siempre las comisiones y las redes en la página oficial de cada plataforma antes de mover fondos reales.
+    <span id="footTs"></span>
+  </footer>
+</main>
+
+<!-- ============ drawer detalle ============ -->
+<div class="drawer" id="drawer">
+  <header><b id="dTitle">Detalle</b><button class="x" id="dClose">×</button></header>
+  <div class="body" id="dBody"></div>
+</div>
+
+<!-- ============ modal config ============ -->
+<div class="modal" id="cfgModal">
+  <div class="box">
+    <header><b>Configuración</b><button class="x" id="cfgClose">×</button></header>
+    <div class="body">
+      <div class="grid2">
+        <div>
+          <h2 style="font-size:13px">Inventario (USDT por plataforma)</h2>
+          <div id="cfgBal"></div>
+        </div>
+        <div>
+          <h2 style="font-size:13px">Supuestos</h2>
+          <div class="kv"><span class="k">Tope por operación (USDT)</span><input type="number" id="cfgMax" min="50" step="50" style="width:110px"></div>
+          <div class="kv"><span class="k">Slippage por punta (%)</span><input type="number" id="cfgSlip" min="0" step="0.01" style="width:110px"></div>
+          <div class="kv"><span class="k">Umbral neto (USDT)</span><input type="number" id="cfgMinUsd" min="0" step="0.1" style="width:110px"></div>
+          <div class="kv"><span class="k">Umbral neto (bps)</span><input type="number" id="cfgMinBps" min="0" step="1" style="width:110px"></div>
+          <div class="kv"><span class="k">Actualizar cada (seg)</span><input type="number" id="cfgEvery" min="3" step="1" style="width:110px"></div>
+          <div class="kv"><span class="k">% asumido si no hay dato de red</span><input type="number" id="cfgGen" min="0" step="0.01" style="width:110px"></div>
+        </div>
+      </div>
+      <h2 style="font-size:13px;margin-top:14px">Ciclo en CLP (tu fondeo real)</h2>
+      <div class="row" style="gap:18px">
+        <label class="chk"><input type="checkbox" id="cfgClp"> Incluir el tramo CLP → USDT → CLP en el neto</label>
+        <label class="chk">Comprar USDT con CLP cuesta <input type="number" id="cfgClpBuy" min="0" step="0.05" style="width:80px"> %</label>
+        <label class="chk">Vender USDT por CLP cuesta <input type="number" id="cfgClpSell" min="0" step="0.05" style="width:80px"> %</label>
+        <label class="chk">vuelvo a CLP cada <input type="number" id="cfgClpBatch" min="1" step="1" style="width:70px"> ciclos</label>
+      </div>
+      <p class="mut" style="font-size:11.5px;margin:6px 0 0">Es el spread del P2P (o de la rampa fiat), no una comisión explícita: en Binance P2P suele andar entre 0,2 % y 1 % por punta. Si te quedas en USDT y solo pasas a CLP cada varios ciclos, súbelo en «vuelvo a CLP cada N ciclos».</p>
+      <h2 style="font-size:13px;margin-top:14px">Interruptores</h2>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="cfgDepth"> Recortar el tramo al primer nivel del libro (más conservador)</label>
+        <label class="chk"><input type="checkbox" id="cfgSlipOn"> Aplicar slippage</label>
+        <label class="chk"><input type="checkbox" id="cfgReb"> Incluir retiro de USDT (rebalanceo)</label>
+        <label class="chk"><input type="checkbox" id="cfgRisk"> Penalizar deriva esperada del precio</label>
+        <label class="chk"><input type="checkbox" id="cfgNotify"> Avisarme (notificación + pitido) cuando aparezca una ruta RENTABLE</label>
+      </div>
+      <h2 style="font-size:13px;margin-top:14px">Plataformas activas y descuentos</h2>
+      <div id="cfgVenues" class="row"></div>
+      <h2 style="font-size:13px;margin-top:14px">Comisión taker propia (%)</h2>
+      <div id="cfgTaker" class="row"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn" id="cfgSave">Guardar</button>
+        <button class="btn ghost sm" id="cfgReset">Restablecer todo</button>
+        <button class="btn ghost sm" id="cfgExport">Exportar JSON</button>
+        <button class="btn ghost sm" id="cfgImport">Importar JSON</button>
+      </div>
+      <p class="mut" style="font-size:11.5px">Se guarda solo en tu navegador (localStorage). Nada sale de tu equipo salvo las consultas a las APIs públicas de precios.</p>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" id="snapshot">{"ok":true,"ts":1791745752911,"priceTtl":5.0,"venues":{"binance":{"name":"Binance","taker":0.001,"maker":0.001,"url":"https://www.binance.com/en/fee/schedule","note":"Spot taker 0.10%. Con pago en BNB: 0.075%.","taker_bnb":0.00075},"bybit":{"name":"Bybit","taker":0.001,"maker":0.001,"url":"https://www.bybit.com/en/help-center/article/Trading-Fee-Structure","note":"Spot taker 0.10%. Diferencias por par (algunos 0.06%)."},"okx":{"name":"OKX","taker":0.001,"maker":0.0008,"url":"https://www.okx.com/fees/spot","note":"Spot taker 0.10%, maker 0.08% (nivel 1)."},"bitget":{"name":"Bitget","taker":0.001,"maker":0.0008,"url":"https://www.bitget.com/fee-schedule","note":"Spot taker 0.10%, maker 0.08%. Descuento con BGB."}},"coins":[{"sym":"BTC","name":"Bitcoin","eta":45,"risk":"alto"}],"quotes":{"BTC":{"binance":{"bid":83668.0,"ask":83668.01,"bidSz":4.89048,"askSz":2.83579,"volUsd":600428744.1087995,"lo":82804.65,"hi":84199.0,"inst":"BTCUSDT"},"bybit":{"bid":83666.4,"ask":83666.5,"bidSz":0.74456,"askSz":0.653151,"volUsd":285758215.2335534,"inst":"BTCUSDT"},"okx":{"bid":83662.6,"ask":83662.7,"bidSz":0.63689588,"askSz":0.41249618,"volUsd":146083007.7194977,"inst":"BTC-USDT"},"bitget":{"bid":83667.08,"ask":83667.09,"bidSz":0.572212,"askSz":0.929266,"volUsd":101524481.94914433,"inst":"BTCUSDT"}}},"withdraw":{"binance":{"BTC":{"fee":2e-05,"chain":"BTC","src":"live","depositable":true}},"bitget":{"BTC":{"fee":2e-05,"chain":"BTC","src":"live","depositable":true}},"bybit":{"BTC":{"fee":2.6e-05,"chain":"BTC","src":"estimado","depositable":true}},"okx":{"BTC":{"fee":2.6e-05,"chain":"BTC","src":"estimado","depositable":true}}},"withdrawUsdt":{"binance":{"chain":"BSC","fee":0.01,"src":"live"},"bitget":{"chain":"BEP20","fee":0.01,"src":"live"},"bybit":{"chain":"BEP20","fee":1.0,"src":"declarado*"},"okx":{"chain":"BEP20","fee":1.0,"src":"declarado*"}},"errors":[],"sources":[{"name":"Binance API","url":"https://api.binance.com/api/v3/ticker/bookTicker","usado":"precios + comisiones de retiro (live)"},{"name":"Bybit API","url":"https://api.bybit.com/v5/market/tickers?category=spot","usado":"precios"},{"name":"OKX API","url":"https://www.okx.com/api/v5/market/tickers?instType=SPOT","usado":"precios"},{"name":"Bitget API","url":"https://api.bitget.com/api/v2/spot/market/tickers","usado":"precios + comisiones de retiro (live)"}]}</script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
